@@ -246,13 +246,18 @@ export default function PaintingViewer({ painting, facts }: Props) {
             {painting.license_name && <p>Лицензия: {painting.license_name}</p>}
             <div className="mt-2 space-y-1">
               {painting.license_url && (
-                <a href={painting.license_url} target="_blank" rel="noreferrer">
-                  Подробнее о лицензии
-                </a>
+                <p>
+                  <a href={painting.license_url} target="_blank" rel="noreferrer">
+                    Подробнее о лицензии
+                  </a>
+                </p>
               )}
-              <a href={painting.source_url} target="_blank" rel="noreferrer">
-                Source: Wikimedia
-              </a>
+              <p>
+                Source:{' '}
+                <a href={painting.source_url} target="_blank" rel="noreferrer">
+                  Wikimedia
+                </a>
+              </p>
             </div>
           </div>
         </aside>
