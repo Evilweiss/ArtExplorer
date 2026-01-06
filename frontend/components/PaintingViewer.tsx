@@ -152,6 +152,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     }
     const zoom = 1;
     const { left, top, width: lensWidth, height: lensHeight } = getHighlightRect(hoveredFact);
+        
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-left * zoom}px ${-top * zoom}px`;
 
