@@ -175,31 +175,14 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const maxZoom = 3;
-    const paddingFactor = 1.3;
-    const factWidth = selectedFact.w * imageSize.width;
-    const factHeight = selectedFact.h * imageSize.height;
-    const zoom = Math.min(
-      maxZoom,
-      620 / (factWidth * paddingFactor),
-      520 / (factHeight * paddingFactor),
-    );
-    const cropWidth = clamp(factWidth * zoom * paddingFactor, 320, 620);
-    const cropHeight = clamp(factHeight * zoom * paddingFactor, 240, 520);
-    const centerX = (selectedFact.x + selectedFact.w / 2) * imageSize.width;
-    const centerY = (selectedFact.y + selectedFact.h / 2) * imageSize.height;
-    const backgroundWidth = imageSize.width * zoom;
-    const backgroundHeight = imageSize.height * zoom;
-    const backgroundSize = `${backgroundWidth}px ${backgroundHeight}px`;
-    const desiredX = -centerX * zoom + cropWidth / 2;
-    const desiredY = -centerY * zoom + cropHeight / 2;
-    const backgroundPositionX = clamp(desiredX, cropWidth - backgroundWidth, 0);
-    const backgroundPositionY = clamp(desiredY, cropHeight - backgroundHeight, 0);
-    const backgroundPosition = `${backgroundPositionX}px ${backgroundPositionY}px`;
+    const zoom = 3;
+    const lensRect = getLensRect(selectedFact);
+    const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
+    const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
 
     return {
-      width: cropWidth,
-      height: cropHeight,
+      width: lensRect.width * zoom,
+      height: lensRect.height * zoom,
       backgroundSize,
       backgroundPosition,
     };
