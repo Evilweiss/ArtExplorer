@@ -51,6 +51,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const lensRef = useRef<HTMLDivElement | null>(null);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -99,6 +100,14 @@ export default function PaintingViewer({ painting, facts }: Props) {
     () => facts.find((fact) => fact.id === highlightId) ?? null,
     [facts, highlightId],
   );
+  const hoveredFact = useMemo(
+    () => facts.find((fact) => fact.id === hoveredId) ?? null,
+    [facts, hoveredId],
+  );
+  const selectedFact = useMemo(
+    () => facts.find((fact) => fact.id === selectedId) ?? null,
+    [facts, selectedId],
+  );
 
   const handleSelect = (factId: string) => {
     setSelectedId(factId);
@@ -115,6 +124,72 @@ export default function PaintingViewer({ painting, facts }: Props) {
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   };
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+
+  const lensStyle = useMemo(() => {
+    if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
+      return null;
+    }
+    const zoom = 2.6;
+    const factWidth = hoveredFact.w * imageSize.width;
+    const factHeight = hoveredFact.h * imageSize.height;
+    const lensWidth = clamp(factWidth * 1.4, 180, 280);
+    const lensHeight = clamp(factHeight * 1.4, 140, 240);
+    const centerX = (hoveredFact.x + hoveredFact.w / 2) * imageSize.width;
+    const centerY = (hoveredFact.y + hoveredFact.h / 2) * imageSize.height;
+    const left = clamp(centerX - lensWidth / 2, 12, imageSize.width - lensWidth - 12);
+    const top = clamp(centerY - lensHeight / 2, 12, imageSize.height - lensHeight - 12);
+    const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
+    const backgroundPosition = `${-centerX * zoom + lensWidth / 2}px ${
+      -centerY * zoom + lensHeight / 2
+    }px`;
+
+    return {
+      left,
+      top,
+      width: lensWidth,
+      height: lensHeight,
+      backgroundSize,
+      backgroundPosition,
+    };
+  }, [hoveredFact, imageSize]);
+
+  const modalImageStyle = useMemo(() => {
+    if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
+      return null;
+    }
+    const zoom = 3;
+    const cropWidth = clamp(selectedFact.w * imageSize.width * 2.2, 320, 620);
+    const cropHeight = clamp(selectedFact.h * imageSize.height * 2.2, 240, 520);
+    const centerX = (selectedFact.x + selectedFact.w / 2) * imageSize.width;
+    const centerY = (selectedFact.y + selectedFact.h / 2) * imageSize.height;
+    const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
+    const backgroundPosition = `${-centerX * zoom + cropWidth / 2}px ${
+      -centerY * zoom + cropHeight / 2
+    }px`;
+
+    return {
+      width: cropWidth,
+      height: cropHeight,
+      backgroundSize,
+      backgroundPosition,
+    };
+  }, [selectedFact, imageSize]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        clearSelection();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedId]);
 
   const genresLabel = painting.genre_name?.filter(Boolean).join(", ");
 
@@ -136,7 +211,10 @@ export default function PaintingViewer({ painting, facts }: Props) {
 
       <main className="mx-auto grid max-w-6xl gap-10 px-6 py-10 lg:grid-cols-[2fr_1fr]">
         <section className="relative">
-          <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+          <div
+            className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg"
+            onMouseLeave={() => setHoveredId(null)}
+          >
             <img
               ref={imageRef}
               src={painting.image_url}
@@ -191,12 +269,38 @@ export default function PaintingViewer({ painting, facts }: Props) {
                     height={fact.h * imageSize.height}
                     fill="transparent"
                     onMouseEnter={() => setHoveredId(fact.id)}
-                    onMouseLeave={() => setHoveredId(null)}
                     onClick={() => handleSelect(fact.id)}
                     className="cursor-pointer"
                   />
                 ))}
               </svg>
+            )}
+            {hoveredFact && lensStyle && (
+              <div className="pointer-events-none absolute inset-0">
+                <div
+                  ref={lensRef}
+                  className="pointer-events-auto absolute overflow-hidden rounded-2xl border border-sky-300/70 bg-slate-950/30 shadow-[0_12px_30px_rgba(15,23,42,0.45)] backdrop-blur"
+                  style={{
+                    left: lensStyle.left,
+                    top: lensStyle.top,
+                    width: lensStyle.width,
+                    height: lensStyle.height,
+                    backgroundImage: `url(${painting.image_url})`,
+                    backgroundSize: lensStyle.backgroundSize,
+                    backgroundPosition: lensStyle.backgroundPosition,
+                  }}
+                  onMouseEnter={() => setHoveredId(hoveredFact.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <div className="absolute inset-0 ring-1 ring-white/10" />
+                  <button
+                    onClick={() => handleSelect(hoveredFact.id)}
+                    className="absolute bottom-2 right-2 rounded-full bg-sky-400/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow-md transition hover:bg-sky-300"
+                  >
+                    Подробнее
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </section>
@@ -270,6 +374,56 @@ export default function PaintingViewer({ painting, facts }: Props) {
           </div>
         </aside>
       </main>
+
+      {selectedFact && modalImageStyle && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-6 py-10 backdrop-blur-sm"
+          onClick={clearSelection}
+        >
+          <div
+            className="relative flex w-full max-w-4xl flex-col gap-6 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl lg:flex-row"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div
+              className="flex-shrink-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950"
+              style={{
+                width: modalImageStyle.width,
+                height: modalImageStyle.height,
+                backgroundImage: `url(${painting.image_url})`,
+                backgroundSize: modalImageStyle.backgroundSize,
+                backgroundPosition: modalImageStyle.backgroundPosition,
+              }}
+            />
+            <div className="flex-1">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm uppercase tracking-wide text-slate-400">
+                    Фрагмент картины
+                  </div>
+                  <h3 className="text-2xl font-semibold text-slate-100">{selectedFact.name}</h3>
+                </div>
+                <button
+                  onClick={clearSelection}
+                  className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+                >
+                  Закрыть ✕
+                </button>
+              </div>
+              <div className="prose prose-invert text-sm text-slate-300">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeSanitize]}
+                  components={{
+                    a: ({ node, ...props }) => <a {...props} target="_blank" rel="noreferrer" />,
+                  }}
+                >
+                  {selectedFact.description_md}
+                </ReactMarkdown>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
