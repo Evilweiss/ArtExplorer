@@ -111,6 +111,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
 
   const handleSelect = (factId: string) => {
     setSelectedId(factId);
+    setHoveredId(null);
     const params = new URLSearchParams(searchParams.toString());
     const slug = factSlugById.get(factId) ?? factId;
     params.set("fact", slug);
@@ -227,6 +228,20 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                 preserveAspectRatio="none"
               >
+                {facts.map((fact) => (
+                  <rect
+                    key={`${fact.id}-hint`}
+                    x={fact.x * imageSize.width}
+                    y={fact.y * imageSize.height}
+                    width={fact.w * imageSize.width}
+                    height={fact.h * imageSize.height}
+                    fill="rgba(56,189,248,0.08)"
+                    stroke="rgba(56,189,248,0.35)"
+                    strokeWidth="1.5"
+                    rx="6"
+                    pointerEvents="none"
+                  />
+                ))}
                 {highlightFact && (
                   <>
                     <defs>
@@ -254,7 +269,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                       width={highlightFact.w * imageSize.width}
                       height={highlightFact.h * imageSize.height}
                       fill="none"
-                      stroke="rgba(56,189,248,0.9)"
+                      stroke="rgba(56,189,248,0.95)"
                       strokeWidth="3"
                       rx="6"
                     />
@@ -268,14 +283,18 @@ export default function PaintingViewer({ painting, facts }: Props) {
                     width={fact.w * imageSize.width}
                     height={fact.h * imageSize.height}
                     fill="transparent"
-                    onMouseEnter={() => setHoveredId(fact.id)}
+                    onMouseEnter={() => {
+                      if (!selectedId) {
+                        setHoveredId(fact.id);
+                      }
+                    }}
                     onClick={() => handleSelect(fact.id)}
                     className="cursor-pointer"
                   />
                 ))}
               </svg>
             )}
-            {hoveredFact && lensStyle && (
+            {hoveredFact && lensStyle && !selectedId && (
               <div className="pointer-events-none absolute inset-0">
                 <div
                   ref={lensRef}
@@ -295,9 +314,21 @@ export default function PaintingViewer({ painting, facts }: Props) {
                   <div className="absolute inset-0 ring-1 ring-white/10" />
                   <button
                     onClick={() => handleSelect(hoveredFact.id)}
-                    className="absolute bottom-2 right-2 rounded-full bg-sky-400/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow-md transition hover:bg-sky-300"
+                    className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-sky-400/90 text-slate-900 shadow-md transition hover:bg-sky-300"
+                    aria-label="Подробнее"
                   >
-                    Подробнее
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -404,9 +435,21 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 </div>
                 <button
                   onClick={clearSelection}
-                  className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+                  aria-label="Закрыть"
                 >
-                  Закрыть ✕
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
                 </button>
               </div>
               <div className="prose prose-invert text-sm text-slate-300">
