@@ -161,9 +161,17 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 3;
-    const cropWidth = clamp(selectedFact.w * imageSize.width * 2.2, 320, 620);
-    const cropHeight = clamp(selectedFact.h * imageSize.height * 2.2, 240, 520);
+    const maxZoom = 3;
+    const paddingFactor = 1.3;
+    const factWidth = selectedFact.w * imageSize.width;
+    const factHeight = selectedFact.h * imageSize.height;
+    const zoom = Math.min(
+      maxZoom,
+      620 / (factWidth * paddingFactor),
+      520 / (factHeight * paddingFactor),
+    );
+    const cropWidth = clamp(factWidth * zoom * paddingFactor, 320, 620);
+    const cropHeight = clamp(factHeight * zoom * paddingFactor, 240, 520);
     const centerX = (selectedFact.x + selectedFact.w / 2) * imageSize.width;
     const centerY = (selectedFact.y + selectedFact.h / 2) * imageSize.height;
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
