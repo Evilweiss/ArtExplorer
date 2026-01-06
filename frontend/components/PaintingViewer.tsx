@@ -199,41 +199,125 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 className="block h-auto w-full"
               />
               {!selectedId && imageSize.width > 0 && imageSize.height > 0 && (
-              <svg
-                className="absolute inset-0 h-full w-full"
-                viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
-                preserveAspectRatio="none"
-              >
-                {facts.map((fact) => {
-                  const lensRect = getHighlightRect(fact);
-                  const isActive = highlightId === fact.id;
-                  const fill = isActive ? "rgba(56,189,248,0.18)" : "rgba(56,189,248,0.08)";
-                  const stroke = isActive ? "rgba(56,189,248,0.95)" : "rgba(56,189,248,0.35)";
-                  const strokeWidth = isActive ? 3 : 1.5;
-                  return (
+                <svg
+                  className="absolute inset-0 h-full w-full"
+                  viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
+                  preserveAspectRatio="none"
+                >
+                  {!hoveredFact &&
+                    facts.map((fact) => {
+                      const lensRect = getHighlightRect(fact);
+                      return (
+                        <rect
+                          key={`${fact.id}-hint`}
+                          x={lensRect.left}
+                          y={lensRect.top}
+                          width={lensRect.width}
+                          height={lensRect.height}
+                          fill="rgba(56,189,248,0.08)"
+                          stroke="rgba(56,189,248,0.35)"
+                          strokeWidth="1.5"
+                          rx="6"
+                          pointerEvents="none"
+                        />
+                      );
+                    })}
+                  {!hoveredFact &&
+                    highlightFact &&
+                    (() => {
+                      const lensRect = getHighlightRect(highlightFact);
+                      return (
+                        <>
+                          <defs>
+                            <mask id="focus-mask">
+                              <rect width="100%" height="100%" fill="white" />
+                              <rect
+                                x={lensRect.left}
+                                y={lensRect.top}
+                                width={lensRect.width}
+                                height={lensRect.height}
+                                fill="black"
+                                rx="6"
+                              />
+                            </mask>
+                          </defs>
+                          <rect
+                            width="100%"
+                            height="100%"
+                            fill="rgba(2,6,23,0.65)"
+                            mask="url(#focus-mask)"
+                          />
+                          <rect
+                            x={lensRect.left}
+                            y={lensRect.top}
+                            width={lensRect.width}
+                            height={lensRect.height}
+                            fill="none"
+                            stroke="rgba(56,189,248,0.95)"
+                            strokeWidth="3"
+                            rx="6"
+                          />
+                        </>
+                      );
+                    })()}
+                  {facts.map((fact) => (
                     <rect
                       key={fact.id}
-                      x={lensRect.left}
-                      y={lensRect.top}
-                      width={lensRect.width}
-                      height={lensRect.height}
-                      fill={fill}
-                      stroke={stroke}
-                      strokeWidth={strokeWidth}
-                      rx="6"
+                      x={fact.x * imageSize.width}
+                      y={fact.y * imageSize.height}
+                      width={fact.w * imageSize.width}
+                      height={fact.h * imageSize.height}
+                      fill="transparent"
                       onMouseEnter={() => {
                         if (!selectedId) {
                           setHoveredId(fact.id);
                         }
                       }}
-                      onMouseLeave={() => setHoveredId(null)}
                       onClick={() => handleSelect(fact.id)}
-                      className="cursor-pointer transition"
+                      className="cursor-pointer"
                     />
-                  );
-                })}
-              </svg>
-            )}
+                  ))}
+                </svg>
+              )}
+              {hoveredFact && lensStyle && !selectedId && (
+                <div className="pointer-events-none absolute inset-0">
+                  <div
+                    ref={lensRef}
+                    className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 backdrop-blur"
+                    style={{
+                      left: lensStyle.left,
+                      top: lensStyle.top,
+                      width: lensStyle.width,
+                      height: lensStyle.height,
+                      backgroundImage: `url(${painting.image_url})`,
+                      backgroundSize: lensStyle.backgroundSize,
+                      backgroundPosition: lensStyle.backgroundPosition,
+                    }}
+                    onMouseEnter={() => setHoveredId(hoveredFact.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                  >
+                    <div className="absolute inset-0 ring-1 ring-white/10" />
+                    <button
+                      onClick={() => handleSelect(hoveredFact.id)}
+                      className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-sky-400/90 text-slate-900 shadow-md transition hover:bg-sky-300"
+                      aria-label="Подробнее"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
