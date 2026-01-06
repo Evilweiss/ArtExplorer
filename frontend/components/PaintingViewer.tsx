@@ -13,7 +13,7 @@ interface Painting {
   artist_slug: string;
   painting_slug: string;
   museum_name: string | null;
-  genre_name: string | null;
+  genre_name: string[] | null;
   image_url: string;
   source_url: string;
   license_name: string | null;
@@ -39,6 +39,13 @@ interface Props {
   facts: Fact[];
 }
 
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+
 export default function PaintingViewer({ painting, facts }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -48,10 +55,27 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const { factSlugById, factIdBySlug } = useMemo(() => {
+    const slugCounts = new Map<string, number>();
+    const slugById = new Map<string, string>();
+    const idBySlug = new Map<string, string>();
+
+    facts.forEach((fact, index) => {
+      const base = slugify(fact.name) || `fact-${index + 1}`;
+      const count = slugCounts.get(base) ?? 0;
+      const slug = count === 0 ? base : `${base}-${count + 1}`;
+      slugCounts.set(base, count + 1);
+      slugById.set(fact.id, slug);
+      idBySlug.set(slug, fact.id);
+    });
+
+    return { factSlugById: slugById, factIdBySlug: idBySlug };
+  }, [facts]);
+
   useEffect(() => {
     const current = searchParams.get("fact");
-    setSelectedId(current);
-  }, [searchParams]);
+    setSelectedId(current ? factIdBySlug.get(current) ?? null : null);
+  }, [factIdBySlug, searchParams]);
 
   useEffect(() => {
     if (!imageRef.current) {
@@ -79,7 +103,8 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const handleSelect = (factId: string) => {
     setSelectedId(factId);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("fact", factId);
+    const slug = factSlugById.get(factId) ?? factId;
+    params.set("fact", slug);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -90,6 +115,8 @@ export default function PaintingViewer({ painting, facts }: Props) {
     const next = params.toString();
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   };
+
+  const genresLabel = painting.genre_name?.filter(Boolean).join(", ");
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -180,7 +207,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
             <p className="text-slate-300">{painting.artist_name}</p>
             <div className="flex flex-wrap gap-2 text-xs text-slate-400">
               {painting.museum_name && <span>{painting.museum_name}</span>}
-              {painting.genre_name && <span>• {painting.genre_name}</span>}
+              {genresLabel && <span>• {genresLabel}</span>}
             </div>
           </div>
 
@@ -203,18 +230,14 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 return (
                   <li
                     key={fact.id}
-                    className={`rounded-xl border px-3 py-2 transition ${
+                    className={`cursor-pointer rounded-xl border px-3 py-2 transition ${
                       isHighlighted ? "border-sky-400 bg-slate-800" : "border-slate-800"
                     }`}
                     onMouseEnter={() => setHoveredId(fact.id)}
                     onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => handleSelect(fact.id)}
                   >
-                    <button
-                      onClick={() => handleSelect(fact.id)}
-                      className="text-left"
-                    >
-                      <div className="text-sm font-semibold text-slate-100">{fact.name}</div>
-                    </button>
+                    <div className="text-sm font-semibold text-slate-100">{fact.name}</div>
                     {isSelected && (
                       <div className="prose prose-invert mt-2 text-sm text-slate-300">
                         <ReactMarkdown
@@ -241,24 +264,9 @@ export default function PaintingViewer({ painting, facts }: Props) {
             <p>
               Автор: <span className="text-slate-100">{painting.artist_name}</span>
             </p>
-            {painting.museum_name && <p>Музей: {painting.museum_name}</p>}
-            {painting.genre_name && <p>Жанр: {painting.genre_name}</p>}
+            {painting.museum_name && <p>Местоположение: {painting.museum_name}</p>}
+            {genresLabel && <p>Жанры: {genresLabel}</p>}
             {painting.license_name && <p>Лицензия: {painting.license_name}</p>}
-            <div className="mt-2 space-y-1">
-              {painting.license_url && (
-                <p>
-                  <a href={painting.license_url} target="_blank" rel="noreferrer">
-                    Подробнее о лицензии
-                  </a>
-                </p>
-              )}
-              <p>
-                Source:{' '}
-                <a href={painting.source_url} target="_blank" rel="noreferrer">
-                  Wikimedia
-                </a>
-              </p>
-            </div>
           </div>
         </aside>
       </main>
