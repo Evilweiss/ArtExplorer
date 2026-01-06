@@ -70,8 +70,11 @@ export default function PaintingViewer({ painting, facts }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  const activeId = hoveredId ?? selectedId;
-  const activeFact = useMemo(() => facts.find((fact) => fact.id === activeId) ?? null, [facts, activeId]);
+  const highlightId = selectedId ?? hoveredId;
+  const highlightFact = useMemo(
+    () => facts.find((fact) => fact.id === highlightId) ?? null,
+    [facts, highlightId],
+  );
 
   const handleSelect = (factId: string) => {
     setSelectedId(factId);
@@ -119,16 +122,16 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                 preserveAspectRatio="none"
               >
-                {activeFact && (
+                {highlightFact && (
                   <>
                     <defs>
                       <mask id="focus-mask">
                         <rect width="100%" height="100%" fill="white" />
                         <rect
-                          x={activeFact.x * imageSize.width}
-                          y={activeFact.y * imageSize.height}
-                          width={activeFact.w * imageSize.width}
-                          height={activeFact.h * imageSize.height}
+                          x={highlightFact.x * imageSize.width}
+                          y={highlightFact.y * imageSize.height}
+                          width={highlightFact.w * imageSize.width}
+                          height={highlightFact.h * imageSize.height}
                           fill="black"
                           rx="6"
                         />
@@ -141,10 +144,10 @@ export default function PaintingViewer({ painting, facts }: Props) {
                       mask="url(#focus-mask)"
                     />
                     <rect
-                      x={activeFact.x * imageSize.width}
-                      y={activeFact.y * imageSize.height}
-                      width={activeFact.w * imageSize.width}
-                      height={activeFact.h * imageSize.height}
+                      x={highlightFact.x * imageSize.width}
+                      y={highlightFact.y * imageSize.height}
+                      width={highlightFact.w * imageSize.width}
+                      height={highlightFact.h * imageSize.height}
                       fill="none"
                       stroke="rgba(56,189,248,0.9)"
                       strokeWidth="3"
@@ -195,12 +198,13 @@ export default function PaintingViewer({ painting, facts }: Props) {
             </div>
             <ul className="space-y-3">
               {facts.map((fact) => {
-                const isActive = activeId === fact.id;
+                const isHighlighted = highlightId === fact.id;
+                const isSelected = selectedId === fact.id;
                 return (
                   <li
                     key={fact.id}
                     className={`rounded-xl border px-3 py-2 transition ${
-                      isActive ? "border-sky-400 bg-slate-800" : "border-slate-800"
+                      isHighlighted ? "border-sky-400 bg-slate-800" : "border-slate-800"
                     }`}
                     onMouseEnter={() => setHoveredId(fact.id)}
                     onMouseLeave={() => setHoveredId(null)}
@@ -211,7 +215,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                     >
                       <div className="text-sm font-semibold text-slate-100">{fact.name}</div>
                     </button>
-                    {isActive && (
+                    {isSelected && (
                       <div className="prose prose-invert mt-2 text-sm text-slate-300">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}

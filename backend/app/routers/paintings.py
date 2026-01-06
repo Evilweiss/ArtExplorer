@@ -31,7 +31,7 @@ async def read_painting(artist_slug: str, painting_slug: str, session: AsyncSess
     )
 
 
-@router.get("/{painting_id}/facts", response_model=list[FactResponse])
+@router.get("/by-id/{painting_id}/facts", response_model=list[FactResponse])
 async def read_facts(painting_id: str, session: AsyncSession = Depends(get_session)):
     facts = await get_facts_for_painting(session, painting_id)
     return [FactResponse.model_validate(fact) for fact in facts]
