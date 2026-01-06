@@ -129,7 +129,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const clamp = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), max);
 
-  const getLensRect = (fact: Fact) => {
+  const getHighlightRect = (fact: Fact) => {
     const factWidth = fact.w * imageSize.width;
     const factHeight = fact.h * imageSize.height;
     const lensWidth = clamp(factWidth * 1.4, 180, 280);
@@ -155,7 +155,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     }
     const zoom = 2.6;
     const { left, top, width: lensWidth, height: lensHeight, centerX, centerY } =
-      getLensRect(hoveredFact);
+      getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-centerX * zoom + lensWidth / 2}px ${
       -centerY * zoom + lensHeight / 2
@@ -176,7 +176,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
       return null;
     }
     const zoom = 3;
-    const lensRect = getLensRect(selectedFact);
+    const lensRect = getHighlightRect(selectedFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
 
@@ -238,7 +238,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 preserveAspectRatio="none"
               >
                 {facts.map((fact) => {
-                  const lensRect = getLensRect(fact);
+                  const lensRect = getHighlightRect(fact);
                   return (
                     <rect
                       key={`${fact.id}-hint`}
@@ -256,7 +256,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 })}
                 {highlightFact && (
                   (() => {
-                    const lensRect = getLensRect(highlightFact);
+                    const lensRect = getHighlightRect(highlightFact);
                     return (
                       <>
                         <defs>
