@@ -145,7 +145,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   };
 
-  const getHighlightRect = (fact: Fact) => {
+  function getHighlightRect(fact: Fact) {
     const factWidth = fact.w * imageSize.width;
     const factHeight = fact.h * imageSize.height;
     const lensWidth = factWidth;
@@ -163,7 +163,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
       centerX,
       centerY,
     };
-  };
+  }
 
   const modalImageStyle = useMemo(() => {
     if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
