@@ -41,7 +41,7 @@ async function fetchPainting(artistSlug: string, paintingSlug: string): Promise<
 
 async function fetchFacts(paintingId: string): Promise<Fact[]> {
   const baseUrl = process.env.BACKEND_BASE_URL ?? "http://localhost:8000";
-  const response = await fetch(`${baseUrl}/api/v1/paintings/${paintingId}/facts`, {
+  const response = await fetch(`${baseUrl}/api/v1/paintings/by-id/${paintingId}/facts`, {
     cache: "no-store",
   });
   if (!response.ok) {
