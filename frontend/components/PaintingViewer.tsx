@@ -150,7 +150,8 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 2;
+    const zoom = 1;
+
     const { left, top, width: lensWidth, height: lensHeight, centerX, centerY } =
       getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
@@ -234,24 +235,26 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                 preserveAspectRatio="none"
               >
-                {facts.map((fact) => {
-                  const lensRect = getHighlightRect(fact);
-                  return (
-                    <rect
-                      key={`${fact.id}-hint`}
-                      x={lensRect.left}
-                      y={lensRect.top}
-                      width={lensRect.width}
-                      height={lensRect.height}
-                      fill="rgba(56,189,248,0.08)"
-                      stroke="rgba(56,189,248,0.35)"
-                      strokeWidth="1.5"
-                      rx="6"
-                      pointerEvents="none"
-                    />
-                  );
-                })}
-                {highlightFact && (
+                {!hoveredFact &&
+                  facts.map((fact) => {
+                    const lensRect = getHighlightRect(fact);
+                    return (
+                      <rect
+                        key={`${fact.id}-hint`}
+                        x={lensRect.left}
+                        y={lensRect.top}
+                        width={lensRect.width}
+                        height={lensRect.height}
+                        fill="rgba(56,189,248,0.08)"
+                        stroke="rgba(56,189,248,0.35)"
+                        strokeWidth="1.5"
+                        rx="6"
+                        pointerEvents="none"
+                      />
+                    );
+                  })}
+                {!hoveredFact &&
+                  highlightFact &&
                   (() => {
                     const lensRect = getHighlightRect(highlightFact);
                     return (
@@ -287,8 +290,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                         />
                       </>
                     );
-                  })()
-                )}
+                  })()}
                 {facts.map((fact) => (
                   <rect
                     key={fact.id}
