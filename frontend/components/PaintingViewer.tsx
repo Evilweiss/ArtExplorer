@@ -126,18 +126,15 @@ export default function PaintingViewer({ painting, facts }: Props) {
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   };
 
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(Math.max(value, min), max);
-
   const getHighlightRect = (fact: Fact) => {
     const factWidth = fact.w * imageSize.width;
     const factHeight = fact.h * imageSize.height;
-    const lensWidth = clamp(factWidth * 1.4, 180, 280);
-    const lensHeight = clamp(factHeight * 1.4, 140, 240);
+    const lensWidth = factWidth;
+    const lensHeight = factHeight;
     const centerX = (fact.x + fact.w / 2) * imageSize.width;
     const centerY = (fact.y + fact.h / 2) * imageSize.height;
-    const left = clamp(centerX - lensWidth / 2, 12, imageSize.width - lensWidth - 12);
-    const top = clamp(centerY - lensHeight / 2, 12, imageSize.height - lensHeight - 12);
+    const left = fact.x * imageSize.width;
+    const top = fact.y * imageSize.height;
 
     return {
       left,
@@ -153,7 +150,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 2.6;
+    const zoom = 2;
     const { left, top, width: lensWidth, height: lensHeight, centerX, centerY } =
       getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
