@@ -113,7 +113,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 2;
+    const zoom = 1;
     const lensRect = getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
@@ -169,7 +169,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 3;
+    const zoom = 2;
     const lensRect = getHighlightRect(selectedFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
@@ -232,24 +232,26 @@ export default function PaintingViewer({ painting, facts }: Props) {
                   viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                   preserveAspectRatio="none"
                 >
-                  {!hoveredFact &&
-                    facts.map((fact) => {
-                      const lensRect = getHighlightRect(fact);
-                      return (
-                        <rect
-                          key={`${fact.id}-hint`}
-                          x={lensRect.left}
-                          y={lensRect.top}
-                          width={lensRect.width}
-                          height={lensRect.height}
-                          fill="rgba(56,189,248,0.08)"
-                          stroke="rgba(56,189,248,0.35)"
-                          strokeWidth="1.5"
-                          rx="6"
-                          pointerEvents="none"
-                        />
-                      );
-                    })}
+                  {facts.map((fact) => {
+                    const lensRect = getHighlightRect(fact);
+                    const isDimmed = hoveredId && hoveredId !== fact.id;
+                    return (
+                      <rect
+                        key={`${fact.id}-hint`}
+                        x={lensRect.left}
+                        y={lensRect.top}
+                        width={lensRect.width}
+                        height={lensRect.height}
+                        fill="rgba(56,189,248,0.08)"
+                        stroke="rgba(56,189,248,0.35)"
+                        strokeWidth="1.5"
+                        rx="6"
+                        pointerEvents="none"
+                        opacity={isDimmed ? 0.25 : 1}
+                        className="transition-opacity duration-300"
+                      />
+                    );
+                  })}
                   {!hoveredFact &&
                     highlightFact &&
                     (() => {
@@ -377,12 +379,13 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 const isHighlighted = highlightId === fact.id;
                 const isSelected = selectedId === fact.id;
                 const isActive = isHighlighted || isSelected;
+                const isDimmed = hoveredId && hoveredId !== fact.id && !isSelected;
                 return (
                   <li
                     key={fact.id}
-                    className={`cursor-pointer rounded-xl border px-3 py-2 transition ${
+                    className={`cursor-pointer rounded-xl border px-3 py-2 transition-opacity duration-300 ${
                       isActive ? "border-sky-400 bg-slate-800" : "border-slate-800"
-                    }`}
+                    } ${isDimmed ? "opacity-40" : "opacity-100"}`}
                     onMouseEnter={() => setHoveredId(fact.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => handleSelect(fact.id)}
