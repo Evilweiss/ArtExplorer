@@ -152,7 +152,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     }
     const zoom = 1;
     const { left, top, width: lensWidth, height: lensHeight } = getHighlightRect(hoveredFact);
-        
+
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-left * zoom}px ${-top * zoom}px`;
 
@@ -311,7 +311,8 @@ export default function PaintingViewer({ painting, facts }: Props) {
               <div className="pointer-events-none absolute inset-0">
                 <div
                   ref={lensRef}
-                  className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 shadow-[0_12px_30px_rgba(15,23,42,0.45)] backdrop-blur"
+                  className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 shadow-[0_0_30px_rgba(15,23,42,0.45)] backdrop-blur"
+
                   style={{
                     left: lensStyle.left,
                     top: lensStyle.top,
