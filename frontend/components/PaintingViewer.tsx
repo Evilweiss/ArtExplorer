@@ -126,18 +126,15 @@ export default function PaintingViewer({ painting, facts }: Props) {
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   };
 
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(Math.max(value, min), max);
-
   const getHighlightRect = (fact: Fact) => {
     const factWidth = fact.w * imageSize.width;
     const factHeight = fact.h * imageSize.height;
-    const lensWidth = clamp(factWidth * 1.4, 180, 280);
-    const lensHeight = clamp(factHeight * 1.4, 140, 240);
+    const lensWidth = factWidth;
+    const lensHeight = factHeight;
     const centerX = (fact.x + fact.w / 2) * imageSize.width;
     const centerY = (fact.y + fact.h / 2) * imageSize.height;
-    const left = clamp(centerX - lensWidth / 2, 12, imageSize.width - lensWidth - 12);
-    const top = clamp(centerY - lensHeight / 2, 12, imageSize.height - lensHeight - 12);
+    const left = fact.x * imageSize.width;
+    const top = fact.y * imageSize.height;
 
     return {
       left,
@@ -153,13 +150,10 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 2.6;
-    const { left, top, width: lensWidth, height: lensHeight, centerX, centerY } =
-      getHighlightRect(hoveredFact);
+    const zoom = 1;
+    const { left, top, width: lensWidth, height: lensHeight } = getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
-    const backgroundPosition = `${-centerX * zoom + lensWidth / 2}px ${
-      -centerY * zoom + lensHeight / 2
-    }px`;
+    const backgroundPosition = `${-left * zoom}px ${-top * zoom}px`;
 
     return {
       left,
@@ -237,24 +231,26 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                 preserveAspectRatio="none"
               >
-                {facts.map((fact) => {
-                  const lensRect = getHighlightRect(fact);
-                  return (
-                    <rect
-                      key={`${fact.id}-hint`}
-                      x={lensRect.left}
-                      y={lensRect.top}
-                      width={lensRect.width}
-                      height={lensRect.height}
-                      fill="rgba(56,189,248,0.08)"
-                      stroke="rgba(56,189,248,0.35)"
-                      strokeWidth="1.5"
-                      rx="6"
-                      pointerEvents="none"
-                    />
-                  );
-                })}
-                {highlightFact && (
+                {!hoveredFact &&
+                  facts.map((fact) => {
+                    const lensRect = getHighlightRect(fact);
+                    return (
+                      <rect
+                        key={`${fact.id}-hint`}
+                        x={lensRect.left}
+                        y={lensRect.top}
+                        width={lensRect.width}
+                        height={lensRect.height}
+                        fill="rgba(56,189,248,0.08)"
+                        stroke="rgba(56,189,248,0.35)"
+                        strokeWidth="1.5"
+                        rx="6"
+                        pointerEvents="none"
+                      />
+                    );
+                  })}
+                {!hoveredFact &&
+                  highlightFact &&
                   (() => {
                     const lensRect = getHighlightRect(highlightFact);
                     return (
@@ -290,8 +286,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
                         />
                       </>
                     );
-                  })()
-                )}
+                  })()}
                 {facts.map((fact) => (
                   <rect
                     key={fact.id}
@@ -315,7 +310,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
               <div className="pointer-events-none absolute inset-0">
                 <div
                   ref={lensRef}
-                  className="pointer-events-auto absolute overflow-hidden rounded-2xl border border-sky-300/70 bg-slate-950/30 shadow-[0_12px_30px_rgba(15,23,42,0.45)] backdrop-blur"
+                  className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 shadow-[0_12px_30px_rgba(15,23,42,0.45)] backdrop-blur"
                   style={{
                     left: lensStyle.left,
                     top: lensStyle.top,
