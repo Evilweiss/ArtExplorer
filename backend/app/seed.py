@@ -24,7 +24,7 @@ async def seed() -> None:
             painting_slug="starry-night",
             museum_name="Museum of Modern Art",
             genre_name=["Post-Impressionism", "Modern art"],
-            image_url="https://upload.wikimedia.org/wikipedia/commons/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+            image_url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/2048px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg?20121101035929=&download=",
             source_url="https://commons.wikimedia.org/wiki/File:The_Starry_Night.jpg",
             license_name="Public domain",
             license_url="https://creativecommons.org/publicdomain/zero/1.0/",
