@@ -6,10 +6,12 @@ from sqlalchemy import delete
 from app.db.database import AsyncSessionLocal
 from app.models.fact import Fact
 from app.models.painting import Painting
+from app.models.painting_alias import PaintingAlias
 
 
 async def seed() -> None:
     async with AsyncSessionLocal() as session:
+        await session.execute(delete(PaintingAlias))
         await session.execute(delete(Fact))
         await session.execute(delete(Painting))
 
@@ -75,6 +77,19 @@ async def seed() -> None:
         ]
         session.add(painting)
         session.add_all(facts)
+        session.add_all(
+            [
+                PaintingAlias(
+                    painting_id=painting_id,
+                    artist_slug="vincent-van-gogh",
+                    painting_slug="starry-night",
+                ),
+                PaintingAlias(
+                    painting_id=painting_id,
+                    combined_slug="van-gogh-starry-night",
+                ),
+            ]
+        )
         await session.commit()
 
 
