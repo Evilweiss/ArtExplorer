@@ -113,7 +113,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 2;
+    const zoom = 1;
     const lensRect = getHighlightRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
@@ -169,7 +169,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     if (!selectedFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
-    const zoom = 3;
+    const zoom = 2;
     const lensRect = getHighlightRect(selectedFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
@@ -377,11 +377,14 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 const isHighlighted = highlightId === fact.id;
                 const isSelected = selectedId === fact.id;
                 const isActive = isHighlighted || isSelected;
+                const isDimmed = hoveredId && hoveredId !== fact.id && !isSelected;
                 return (
                   <li
                     key={fact.id}
-                    className={`cursor-pointer rounded-xl border px-3 py-2 transition ${
+                    className={`cursor-pointer rounded-xl border px-3 py-2 transition duration-300 ${
                       isActive ? "border-sky-400 bg-slate-800" : "border-slate-800"
+                    } ${isDimmed ? "opacity-40" : "opacity-100"} ${
+                      hoveredId ? "transition-opacity" : ""
                     }`}
                     onMouseEnter={() => setHoveredId(fact.id)}
                     onMouseLeave={() => setHoveredId(null)}
