@@ -174,10 +174,14 @@ export default function PaintingViewer({ painting, facts }: Props) {
     const cropHeight = clamp(factHeight * zoom * paddingFactor, 240, 520);
     const centerX = (selectedFact.x + selectedFact.w / 2) * imageSize.width;
     const centerY = (selectedFact.y + selectedFact.h / 2) * imageSize.height;
-    const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
-    const backgroundPosition = `${-centerX * zoom + cropWidth / 2}px ${
-      -centerY * zoom + cropHeight / 2
-    }px`;
+    const backgroundWidth = imageSize.width * zoom;
+    const backgroundHeight = imageSize.height * zoom;
+    const backgroundSize = `${backgroundWidth}px ${backgroundHeight}px`;
+    const desiredX = -centerX * zoom + cropWidth / 2;
+    const desiredY = -centerY * zoom + cropHeight / 2;
+    const backgroundPositionX = clamp(desiredX, cropWidth - backgroundWidth, 0);
+    const backgroundPositionY = clamp(desiredY, cropHeight - backgroundHeight, 0);
+    const backgroundPosition = `${backgroundPositionX}px ${backgroundPositionY}px`;
 
     return {
       width: cropWidth,
