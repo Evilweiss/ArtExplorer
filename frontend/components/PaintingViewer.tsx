@@ -51,6 +51,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const lensRef = useRef<HTMLDivElement | null>(null);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -95,10 +96,37 @@ export default function PaintingViewer({ painting, facts }: Props) {
   }, []);
 
   const highlightId = selectedId ? null : hoveredId;
+  const hoveredFact = useMemo(
+    () => facts.find((fact) => fact.id === hoveredId) ?? null,
+    [facts, hoveredId],
+  );
+  const highlightFact = useMemo(
+    () => (highlightId ? facts.find((fact) => fact.id === highlightId) ?? null : null),
+    [facts, highlightId],
+  );
   const selectedFact = useMemo(
     () => facts.find((fact) => fact.id === selectedId) ?? null,
     [facts, selectedId],
   );
+
+  const lensStyle = useMemo(() => {
+    if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
+      return null;
+    }
+    const zoom = 2;
+    const lensRect = getHighlightRect(hoveredFact);
+    const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
+    const backgroundPosition = `${-lensRect.left * zoom}px ${-lensRect.top * zoom}px`;
+
+    return {
+      left: lensRect.left,
+      top: lensRect.top,
+      width: lensRect.width,
+      height: lensRect.height,
+      backgroundSize,
+      backgroundPosition,
+    };
+  }, [hoveredFact, imageSize]);
 
   const handleSelect = (factId: string) => {
     setSelectedId(factId);
