@@ -26,4 +26,5 @@ class Painting(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    aliases = relationship("PaintingAlias", back_populates="painting", cascade="all, delete-orphan")
     facts = relationship("Fact", back_populates="painting", cascade="all, delete-orphan")

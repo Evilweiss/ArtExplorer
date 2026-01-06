@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.models.base import Base
 from app.models.fact import Fact
 from app.models.painting import Painting
+from app.models.painting_alias import PaintingAlias
 
 config = context.config
 
