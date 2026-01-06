@@ -7,7 +7,7 @@ interface Painting {
   artist_slug: string;
   painting_slug: string;
   museum_name: string | null;
-  genre_name: string | null;
+  genre_name: string[] | null;
   image_url: string;
   source_url: string;
   license_name: string | null;

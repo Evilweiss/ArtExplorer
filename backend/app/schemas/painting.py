@@ -10,7 +10,7 @@ class PaintingResponse(BaseModel):
     artist_slug: str
     painting_slug: str
     museum_name: str | None
-    genre_name: str | None
+    genre_name: list[str] | None
     image_url: str
     source_url: str
     license_name: str | None

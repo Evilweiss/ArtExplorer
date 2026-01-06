@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -18,7 +18,7 @@ class Painting(Base):
     artist_slug: Mapped[str] = mapped_column(String(200), nullable=False)
     painting_slug: Mapped[str] = mapped_column(String(200), nullable=False)
     museum_name: Mapped[str | None] = mapped_column(Text, nullable=True)
-    genre_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    genre_name: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
     image_url: Mapped[str] = mapped_column(Text, nullable=False)
     source_url: Mapped[str] = mapped_column(Text, nullable=False)
     license_name: Mapped[str | None] = mapped_column(Text, nullable=True)
