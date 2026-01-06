@@ -95,7 +95,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  const highlightId = selectedId ?? hoveredId;
+  const highlightId = selectedId ? null : hoveredId;
   const highlightFact = useMemo(
     () => facts.find((fact) => fact.id === highlightId) ?? null,
     [facts, highlightId],
@@ -222,7 +222,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
               alt={`${painting.name} by ${painting.artist_name}`}
               className="block h-auto w-full"
             />
-            {imageSize.width > 0 && imageSize.height > 0 && (
+            {!selectedId && imageSize.width > 0 && imageSize.height > 0 && (
               <svg
                 className="absolute inset-0 h-full w-full"
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
@@ -362,11 +362,12 @@ export default function PaintingViewer({ painting, facts }: Props) {
               {facts.map((fact) => {
                 const isHighlighted = highlightId === fact.id;
                 const isSelected = selectedId === fact.id;
+                const isActive = isHighlighted || isSelected;
                 return (
                   <li
                     key={fact.id}
                     className={`cursor-pointer rounded-xl border px-3 py-2 transition ${
-                      isHighlighted ? "border-sky-400 bg-slate-800" : "border-slate-800"
+                      isActive ? "border-sky-400 bg-slate-800" : "border-slate-800"
                     }`}
                     onMouseEnter={() => setHoveredId(fact.id)}
                     onMouseLeave={() => setHoveredId(null)}
