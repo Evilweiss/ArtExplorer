@@ -129,19 +129,33 @@ export default function PaintingViewer({ painting, facts }: Props) {
   const clamp = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), max);
 
+  const getLensRect = (fact: Fact) => {
+    const factWidth = fact.w * imageSize.width;
+    const factHeight = fact.h * imageSize.height;
+    const lensWidth = clamp(factWidth * 1.4, 180, 280);
+    const lensHeight = clamp(factHeight * 1.4, 140, 240);
+    const centerX = (fact.x + fact.w / 2) * imageSize.width;
+    const centerY = (fact.y + fact.h / 2) * imageSize.height;
+    const left = clamp(centerX - lensWidth / 2, 12, imageSize.width - lensWidth - 12);
+    const top = clamp(centerY - lensHeight / 2, 12, imageSize.height - lensHeight - 12);
+
+    return {
+      left,
+      top,
+      width: lensWidth,
+      height: lensHeight,
+      centerX,
+      centerY,
+    };
+  };
+
   const lensStyle = useMemo(() => {
     if (!hoveredFact || imageSize.width === 0 || imageSize.height === 0) {
       return null;
     }
     const zoom = 2.6;
-    const factWidth = hoveredFact.w * imageSize.width;
-    const factHeight = hoveredFact.h * imageSize.height;
-    const lensWidth = clamp(factWidth * 1.4, 180, 280);
-    const lensHeight = clamp(factHeight * 1.4, 140, 240);
-    const centerX = (hoveredFact.x + hoveredFact.w / 2) * imageSize.width;
-    const centerY = (hoveredFact.y + hoveredFact.h / 2) * imageSize.height;
-    const left = clamp(centerX - lensWidth / 2, 12, imageSize.width - lensWidth - 12);
-    const top = clamp(centerY - lensHeight / 2, 12, imageSize.height - lensHeight - 12);
+    const { left, top, width: lensWidth, height: lensHeight, centerX, centerY } =
+      getLensRect(hoveredFact);
     const backgroundSize = `${imageSize.width * zoom}px ${imageSize.height * zoom}px`;
     const backgroundPosition = `${-centerX * zoom + lensWidth / 2}px ${
       -centerY * zoom + lensHeight / 2
@@ -240,52 +254,60 @@ export default function PaintingViewer({ painting, facts }: Props) {
                 viewBox={`0 0 ${imageSize.width} ${imageSize.height}`}
                 preserveAspectRatio="none"
               >
-                {facts.map((fact) => (
-                  <rect
-                    key={`${fact.id}-hint`}
-                    x={fact.x * imageSize.width}
-                    y={fact.y * imageSize.height}
-                    width={fact.w * imageSize.width}
-                    height={fact.h * imageSize.height}
-                    fill="rgba(56,189,248,0.08)"
-                    stroke="rgba(56,189,248,0.35)"
-                    strokeWidth="1.5"
-                    rx="6"
-                    pointerEvents="none"
-                  />
-                ))}
+                {facts.map((fact) => {
+                  const lensRect = getLensRect(fact);
+                  return (
+                    <rect
+                      key={`${fact.id}-hint`}
+                      x={lensRect.left}
+                      y={lensRect.top}
+                      width={lensRect.width}
+                      height={lensRect.height}
+                      fill="rgba(56,189,248,0.08)"
+                      stroke="rgba(56,189,248,0.35)"
+                      strokeWidth="1.5"
+                      rx="6"
+                      pointerEvents="none"
+                    />
+                  );
+                })}
                 {highlightFact && (
-                  <>
-                    <defs>
-                      <mask id="focus-mask">
-                        <rect width="100%" height="100%" fill="white" />
+                  (() => {
+                    const lensRect = getLensRect(highlightFact);
+                    return (
+                      <>
+                        <defs>
+                          <mask id="focus-mask">
+                            <rect width="100%" height="100%" fill="white" />
+                            <rect
+                              x={lensRect.left}
+                              y={lensRect.top}
+                              width={lensRect.width}
+                              height={lensRect.height}
+                              fill="black"
+                              rx="6"
+                            />
+                          </mask>
+                        </defs>
                         <rect
-                          x={highlightFact.x * imageSize.width}
-                          y={highlightFact.y * imageSize.height}
-                          width={highlightFact.w * imageSize.width}
-                          height={highlightFact.h * imageSize.height}
-                          fill="black"
+                          width="100%"
+                          height="100%"
+                          fill="rgba(2,6,23,0.65)"
+                          mask="url(#focus-mask)"
+                        />
+                        <rect
+                          x={lensRect.left}
+                          y={lensRect.top}
+                          width={lensRect.width}
+                          height={lensRect.height}
+                          fill="none"
+                          stroke="rgba(56,189,248,0.95)"
+                          strokeWidth="3"
                           rx="6"
                         />
-                      </mask>
-                    </defs>
-                    <rect
-                      width="100%"
-                      height="100%"
-                      fill="rgba(2,6,23,0.65)"
-                      mask="url(#focus-mask)"
-                    />
-                    <rect
-                      x={highlightFact.x * imageSize.width}
-                      y={highlightFact.y * imageSize.height}
-                      width={highlightFact.w * imageSize.width}
-                      height={highlightFact.h * imageSize.height}
-                      fill="none"
-                      stroke="rgba(56,189,248,0.95)"
-                      strokeWidth="3"
-                      rx="6"
-                    />
-                  </>
+                      </>
+                    );
+                  })()
                 )}
                 {facts.map((fact) => (
                   <rect
