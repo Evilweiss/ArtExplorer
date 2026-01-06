@@ -311,7 +311,7 @@ export default function PaintingViewer({ painting, facts }: Props) {
               <div className="pointer-events-none absolute inset-0">
                 <div
                   ref={lensRef}
-                  className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 shadow-[0_0_30px_rgba(15,23,42,0.45)] backdrop-blur"
+                  className="pointer-events-auto absolute overflow-hidden rounded-[6px] border border-sky-300/70 bg-slate-950/30 backdrop-blur"
 
                   style={{
                     left: lensStyle.left,
